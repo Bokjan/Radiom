@@ -1,0 +1,11 @@
+#ifndef __RADIOM_DEFINES_H__
+#define __RADIOM_DEFINES_H__
+
+#ifndef RADIOM_FIFOBUF_CAPACITY
+#define RADIOM_FIFOBUF_CAPACITY (32768)
+#endif // RADIOM_FIFOBUF_CAPACITY
+
+#define RADIOM_SUCCESS  (0)
+#define RADIOM_ERROR    (-1)
+
+#endif // __RADIOM_DEFINES_H__

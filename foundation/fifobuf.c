@@ -2,11 +2,12 @@
 #include <string.h>
 #include "radiom/fifobuf.h"
 
-void radiom_fifobuf_alloc(radiom_fifobuf_t *fb)
+void radiom_fifobuf_init(radiom_fifobuf_t *fb)
 {
     fb->head = 0;
     fb->tail = 0;
-    fb->ptr = (uint8_t*)malloc(sizeof(uint8_t) * RADIOM_FIFOBUF_CAPACITY);
+    fb->ptr = (uint8_t*)malloc(sizeof(uint8_t) * RADIOM_FIFOBUF_CAPACITY * 2);
+    fb->raw = fb->ptr + RADIOM_FIFOBUF_CAPACITY;
 }
 
 void radiom_fifobuf_free(radiom_fifobuf_t *fb)
