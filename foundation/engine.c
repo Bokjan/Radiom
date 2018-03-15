@@ -109,7 +109,7 @@ int radiom_engine_getbytes(radiom_engine_t *eng, void *dest, size_t count)
             r = radiom_engine_refresh_buffer(eng);
             if(r == RADIOM_ERROR)
             {
-                fprintf(stderr, "Radiom: RTLSDR device read failed!");
+                fputs("Radiom: RTLSDR device read failed!", stderr);
                 exit(-1);
             }
             fbsize = radiom_fifobuf_size(eng->fb);

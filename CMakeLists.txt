@@ -7,7 +7,8 @@ include_directories(include)
 
 set(SOURCE_FILES
     foundation/engine.c foundation/fifobuf.c
-    whitener/whitener.c whitener/chacha.c)
+    whitener/whitener.c whitener/chacha.c
+    distribution/uniform.c)
 add_library(radiom SHARED ${SOURCE_FILES})
 set_target_properties(radiom PROPERTIES VERSION 0.0.1 SOVERSION 0.0.1)
 target_link_libraries(radiom rtlsdr)

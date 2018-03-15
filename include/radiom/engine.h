@@ -1,6 +1,7 @@
 #ifndef __RADIOM_ENGINE_H__
 #define __RADIOM_ENGINE_H__
 
+#include <stddef.h>
 #include <stdbool.h>
 
 void radiom_init(void); // Run this first!
