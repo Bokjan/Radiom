@@ -7,6 +7,7 @@ extern "C"
 #endif
 
 #include "radiom/engine.h"
+#include "radiom/defines.h"
 
 #ifdef __cplusplus
 }
