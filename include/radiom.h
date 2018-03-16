@@ -12,6 +12,7 @@ extern "C"
 #include "radiom/distribution/normal.h"
 #include "radiom/distribution/uniform.h"
 #include "radiom/distribution/poisson.h"
+#include "radiom/distribution/bernoulli.h"
 
 #ifdef __cplusplus
 }
