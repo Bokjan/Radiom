@@ -10,6 +10,11 @@
 #ifndef ECRYPT_SYNC
 #define ECRYPT_SYNC
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 #include "ecrypt-portable.h"
 
 /* ------------------------------------------------------------------------- */
@@ -275,5 +280,9 @@ void ECRYPT_keystream_blocks(
 #endif
 
 /* ------------------------------------------------------------------------- */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
