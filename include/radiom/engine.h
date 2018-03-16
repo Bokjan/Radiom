@@ -30,6 +30,7 @@ radiom_engine_t* radiom_get_engine(void);
 int radiom_engine_start(radiom_engine_t *eng);
 int radiom_engine_stop(radiom_engine_t *eng); 
 int radiom_engine_getbytes(radiom_engine_t *eng, void *dest, size_t count);
+int radiom_engine_entropy_bytes(radiom_engine_t *eng, void *dest, size_t count);
 int radiom_engine_refresh_buffer(radiom_engine_t *eng);
 void radiom_engine_set_freq(radiom_engine_t *eng, int frequency); // Hz
 

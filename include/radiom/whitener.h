@@ -7,7 +7,7 @@
 struct radiom_whitener
 {
     ECRYPT_ctx x;
-    uint8_t key[32], nonce[8];
+    uint8_t key[32], iv[8];
 };
 
 typedef struct radiom_whitener radiom_whitener_t;

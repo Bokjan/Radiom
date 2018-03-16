@@ -9,6 +9,7 @@ extern "C"
 #include "radiom/engine.h"
 #include "radiom/defines.h"
 
+#include "radiom/distribution/normal.h"
 #include "radiom/distribution/uniform.h"
 
 #ifdef __cplusplus

@@ -1,8 +1,6 @@
 #include "radiom/engine.h"
+#include "radiom/defines.h"
 #include "radiom/distribution/uniform.h"
-
-#define RADIOM_MAX_INT32 (0x7FFFFFFF)
-#define RADIOM_MAX_INT64 (0x7FFFFFFFFFFFFFFF)
 
 int32_t radiom_uniform_int32(radiom_engine_t *e)
 {

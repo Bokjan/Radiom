@@ -101,7 +101,7 @@ int radiom_engine_getbytes(radiom_engine_t *eng, void *dest, size_t count)
         fbsize = radiom_fifobuf_size(eng->fb);
         if(count <= fbsize)
         {
-            radiom_fifobuf_deque(eng->fb, dest + copied, count);
+            radiom_fifobuf_dequeue(eng->fb, dest + copied, count);
             return RADIOM_SUCCESS;
         }
         if(fbsize == 0)
@@ -115,7 +115,37 @@ int radiom_engine_getbytes(radiom_engine_t *eng, void *dest, size_t count)
             fbsize = radiom_fifobuf_size(eng->fb);
         }
         n = (count <= fbsize ? count : fbsize);
-        radiom_fifobuf_deque(eng->fb, dest + copied, n);
+        radiom_fifobuf_dequeue(eng->fb, dest + copied, n);
+        count -= n;
+        copied += n;
+    }
+    return RADIOM_SUCCESS;
+}
+
+int radiom_engine_entropy_bytes(radiom_engine_t *eng, void *dest, size_t count)
+{
+    int r;
+    size_t n, fbsize, copied = 0;
+    while(count > 0)
+    {
+        fbsize = radiom_fifobuf_size(eng->fb);
+        if(count <= fbsize)
+        {
+            radiom_fifobuf_dequeue2(eng->fb, dest + copied, count);
+            return RADIOM_SUCCESS;
+        }
+        if(fbsize == 0)
+        {
+            r = radiom_engine_refresh_buffer(eng);
+            if(r == RADIOM_ERROR)
+            {
+                fputs("Radiom: RTLSDR device read failed!", stderr);
+                exit(-1);
+            }
+            fbsize = radiom_fifobuf_size(eng->fb);
+        }
+        n = (count <= fbsize ? count : fbsize);
+        radiom_fifobuf_dequeue2(eng->fb, dest + copied, n);
         count -= n;
         copied += n;
     }

@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <string.h>
+#include "radiom/defines.h"
 #include "radiom/fifobuf.h"
 
 void radiom_fifobuf_init(radiom_fifobuf_t *fb)
@@ -22,11 +23,20 @@ size_t radiom_fifobuf_size(radiom_fifobuf_t *fb)
     return fb->tail - fb->head;
 }
 
-int radiom_fifobuf_deque(radiom_fifobuf_t *fb, void *dest, size_t size)
+int radiom_fifobuf_dequeue(radiom_fifobuf_t *fb, void *dest, size_t size)
 {
     if(fb->tail - fb->head < size)
-        return -1;
+        return RADIOM_ERROR;
     memcpy(dest, fb->ptr + fb->head, size);
+    fb->head += size;
+    return 0;
+}
+
+int radiom_fifobuf_dequeue2(radiom_fifobuf_t *fb, void *dest, size_t size)
+{
+    if(fb->tail - fb->head < size)
+        return RADIOM_ERROR;
+    memcpy(dest, fb->raw + fb->head, size);
     fb->head += size;
     return 0;
 }
