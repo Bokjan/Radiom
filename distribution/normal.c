@@ -7,7 +7,7 @@
 #include "radiom/distribution/uniform.h"
 
 // Box-Muller
-double radiom_normal(radiom_engine_t *e, double mean, double stddev)
+double radiom_normal(double mean, double stddev)
 {
     static const double two_pi = 2.0 * 3.14159265358979323846;
 
@@ -21,8 +21,8 @@ double radiom_normal(radiom_engine_t *e, double mean, double stddev)
     
     do
     {
-        u1 = radiom_uniform_double(e);
-        u2 = radiom_uniform_double(e);
+        u1 = radiom_uniform_double();
+        u2 = radiom_uniform_double();
     }
     while(u1 <= DBL_MIN);
 
@@ -32,12 +32,12 @@ double radiom_normal(radiom_engine_t *e, double mean, double stddev)
     return z0 * stddev + mean;
 }
 
-double radiom_lognormal(radiom_engine_t *e, double mean, double stddev)
+double radiom_lognormal(double mean, double stddev)
 {
     double r;
     do
     {
-        r = radiom_normal(e, 0.0, 1.0);
+        r = radiom_normal(0.0, 1.0);
     }
     while(r > 1.0 || r < -1.0);
     r = r * log(stddev) + log(mean);

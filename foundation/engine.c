@@ -8,8 +8,9 @@
 #include "radiom/whitener.h"
 
 pthread_spinlock_t radiom_engine_lock;
+radiom_engine_t radiom_engine_instance;
 
-static void radiom_initialize_device(radiom_engine_t *eng);
+static void radiom_initialize_device(void);
 
 void radiom_init(void)
 {
@@ -31,77 +32,77 @@ radiom_engine_t* radiom_get_engine(void)
     return &singleton;
 }
 
-static void radiom_initialize_device(radiom_engine_t *eng)
+static void radiom_initialize_device(void)
 {
-    if(eng->is_initialized)
+    if(radiom_engine_instance.is_initialized)
         return;
-    eng->dev = NULL;
-    eng->fb = (radiom_fifobuf_t*)malloc(sizeof(radiom_fifobuf_t));
-    eng->wtn = (radiom_whitener_t*)malloc(sizeof(radiom_whitener_t));
-    radiom_fifobuf_init(eng->fb);
-    radiom_whitener_init(eng->wtn);
-    eng->frequency = RADIOM_RADIO_FREQUENCY;
-    eng->sample_rate = RADIOM_RADIO_SAMPLE_RATE;
-    eng->is_initialized = true;
+    radiom_engine_instance.dev = NULL;
+    radiom_engine_instance.fb = (radiom_fifobuf_t*)malloc(sizeof(radiom_fifobuf_t));
+    radiom_engine_instance.wtn = (radiom_whitener_t*)malloc(sizeof(radiom_whitener_t));
+    radiom_fifobuf_init(radiom_engine_instance.fb);
+    radiom_whitener_init(radiom_engine_instance.wtn);
+    radiom_engine_instance.frequency = RADIOM_RADIO_FREQUENCY;
+    radiom_engine_instance.sample_rate = RADIOM_RADIO_SAMPLE_RATE;
+    radiom_engine_instance.is_initialized = true;
 }
 
-static int radiom_engine_start_rtlsdr(radiom_engine_t *eng)
+static int radiom_engine_start_rtlsdr(void)
 {
     int r;
-    r = rtlsdr_open(&eng->dev, 0); // 0 is `device index`
+    r = rtlsdr_open(&radiom_engine_instance.dev, 0); // 0 is `device index`
     if(r < 0)
         return RADIOM_ERROR;
-    r = rtlsdr_set_sample_rate(eng->dev, eng->sample_rate);
+    r = rtlsdr_set_sample_rate(radiom_engine_instance.dev, radiom_engine_instance.sample_rate);
     if(r < 0)
         return RADIOM_ERROR;
-    r = rtlsdr_set_tuner_gain_mode(eng->dev, 0); // Auto gain
+    r = rtlsdr_set_tuner_gain_mode(radiom_engine_instance.dev, 0); // Auto gain
     if(r < 0)
         return RADIOM_ERROR;
-    r = rtlsdr_reset_buffer(eng->dev);
+    r = rtlsdr_reset_buffer(radiom_engine_instance.dev);
     if(r < 0)
         return RADIOM_ERROR;
     return RADIOM_SUCCESS;
 }
 
-int radiom_engine_start(radiom_engine_t *eng)
+int radiom_engine_start(void)
 {
     int r = RADIOM_SUCCESS;
-    if(eng->is_started)
+    if(radiom_engine_instance.is_started)
         return RADIOM_SUCCESS;
     pthread_spin_lock(&radiom_engine_lock);
     r = radiom_engine_start_rtlsdr(eng);
     if(r >= 0)
-        eng->is_started = true;
+        radiom_engine_instance.is_started = true;
     pthread_spin_unlock(&radiom_engine_lock);
     return r;
 }
 
-int radiom_engine_stop(radiom_engine_t *eng)
+int radiom_engine_stop(void)
 {
     if(eng == NULL)
         return RADIOM_SUCCESS;
-    if(!eng->is_started)
-        rtlsdr_close(eng->dev);
-    if(!eng->is_initialized)
+    if(!radiom_engine_instance.is_started)
+        rtlsdr_close(radiom_engine_instance.dev);
+    if(!radiom_engine_instance.is_initialized)
     {
-        radiom_fifobuf_free(eng->fb);
-        free(eng->fb);
-        free(eng->wtn);
+        radiom_fifobuf_free(radiom_engine_instance.fb);
+        free(radiom_engine_instance.fb);
+        free(radiom_engine_instance.wtn);
     }
-    eng->is_started = false;
+    radiom_engine_instance.is_started = false;
     return RADIOM_SUCCESS;
 }
 
-int radiom_engine_getbytes(radiom_engine_t *eng, void *dest, size_t count)
+int radiom_engine_getbytes(void *dest, size_t count)
 {
     int r;
     size_t n, fbsize, copied = 0;
     while(count > 0)
     {
-        fbsize = radiom_fifobuf_size(eng->fb);
+        fbsize = radiom_fifobuf_size(radiom_engine_instance.fb);
         if(count <= fbsize)
         {
-            radiom_fifobuf_dequeue(eng->fb, dest + copied, count);
+            radiom_fifobuf_dequeue(radiom_engine_instance.fb, dest + copied, count);
             return RADIOM_SUCCESS;
         }
         if(fbsize == 0)
@@ -112,26 +113,26 @@ int radiom_engine_getbytes(radiom_engine_t *eng, void *dest, size_t count)
                 fputs("Radiom: RTLSDR device read failed!", stderr);
                 exit(-1);
             }
-            fbsize = radiom_fifobuf_size(eng->fb);
+            fbsize = radiom_fifobuf_size(radiom_engine_instance.fb);
         }
         n = (count <= fbsize ? count : fbsize);
-        radiom_fifobuf_dequeue(eng->fb, dest + copied, n);
+        radiom_fifobuf_dequeue(radiom_engine_instance.fb, dest + copied, n);
         count -= n;
         copied += n;
     }
     return RADIOM_SUCCESS;
 }
 
-int radiom_engine_entropy_bytes(radiom_engine_t *eng, void *dest, size_t count)
+int radiom_engine_entropy_bytes(void *dest, size_t count)
 {
     int r;
     size_t n, fbsize, copied = 0;
     while(count > 0)
     {
-        fbsize = radiom_fifobuf_size(eng->fb);
+        fbsize = radiom_fifobuf_size(radiom_engine_instance.fb);
         if(count <= fbsize)
         {
-            radiom_fifobuf_dequeue2(eng->fb, dest + copied, count);
+            radiom_fifobuf_dequeue2(radiom_engine_instance.fb, dest + copied, count);
             return RADIOM_SUCCESS;
         }
         if(fbsize == 0)
@@ -142,29 +143,29 @@ int radiom_engine_entropy_bytes(radiom_engine_t *eng, void *dest, size_t count)
                 fputs("Radiom: RTLSDR device read failed!", stderr);
                 exit(-1);
             }
-            fbsize = radiom_fifobuf_size(eng->fb);
+            fbsize = radiom_fifobuf_size(radiom_engine_instance.fb);
         }
         n = (count <= fbsize ? count : fbsize);
-        radiom_fifobuf_dequeue2(eng->fb, dest + copied, n);
+        radiom_fifobuf_dequeue2(radiom_engine_instance.fb, dest + copied, n);
         count -= n;
         copied += n;
     }
     return RADIOM_SUCCESS;
 }
 
-int radiom_engine_refresh_buffer(radiom_engine_t *eng)
+int radiom_engine_refresh_buffer(void)
 {
     int r, c;
-    r = rtlsdr_read_sync(eng->dev, eng->fb->raw, RADIOM_FIFOBUF_CAPACITY, &c);
+    r = rtlsdr_read_sync(radiom_engine_instance.dev, radiom_engine_instance.fb->raw, RADIOM_FIFOBUF_CAPACITY, &c);
     if(r < 0)
         return RADIOM_ERROR;
-    radiom_whitener_whiten(eng->wtn, eng->fb->raw, 
-                           eng->fb->ptr, RADIOM_FIFOBUF_CAPACITY);
-    radiom_fifobuf_setfull(eng->fb);
+    radiom_whitener_whiten(radiom_engine_instance.wtn, radiom_engine_instance.fb->raw, 
+                           radiom_engine_instance.fb->ptr, RADIOM_FIFOBUF_CAPACITY);
+    radiom_fifobuf_setfull(radiom_engine_instance.fb);
     return RADIOM_SUCCESS;
 }
 
-void radiom_engine_set_freq(radiom_engine_t *eng, int frequency)
+void radiom_engine_set_freq(int frequency)
 {
-    eng->frequency = frequency;
+    radiom_engine_instance.frequency = frequency;
 }

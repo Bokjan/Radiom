@@ -27,11 +27,11 @@ struct radiom_engine
 typedef struct radiom_engine radiom_engine_t;
 
 radiom_engine_t* radiom_get_engine(void);
-int radiom_engine_start(radiom_engine_t *eng);
-int radiom_engine_stop(radiom_engine_t *eng); 
-int radiom_engine_getbytes(radiom_engine_t *eng, void *dest, size_t count);
-int radiom_engine_entropy_bytes(radiom_engine_t *eng, void *dest, size_t count);
-int radiom_engine_refresh_buffer(radiom_engine_t *eng);
-void radiom_engine_set_freq(radiom_engine_t *eng, int frequency); // Hz
+int radiom_engine_start(void);
+int radiom_engine_stop(void); 
+int radiom_engine_getbytes(void *dest, size_t count);
+int radiom_engine_entropy_bytes(void *dest, size_t count);
+int radiom_engine_refresh_buffer(void);
+void radiom_engine_set_freq(int frequency); // Hz
 
 #endif // __RADIOM_ENGINE_H__
