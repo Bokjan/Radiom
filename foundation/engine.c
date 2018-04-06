@@ -15,14 +15,13 @@ static void radiom_initialize_device(void);
 void radiom_init(void)
 {
     pthread_spin_init(&radiom_engine_lock, PTHREAD_PROCESS_SHARED);
-    radiom_initialize_device(radiom_get_engine());
+    radiom_initialize_device();
 }
 
 void radiom_exit(void)
 {
-    radiom_engine_t *e = radiom_get_engine();
     if(e->is_started)
-        radiom_engine_stop(e);
+        radiom_engine_stop();
     pthread_spin_destroy(&radiom_engine_lock);
 }
 
@@ -70,7 +69,7 @@ int radiom_engine_start(void)
     if(radiom_engine_instance.is_started)
         return RADIOM_SUCCESS;
     pthread_spin_lock(&radiom_engine_lock);
-    r = radiom_engine_start_rtlsdr(eng);
+    r = radiom_engine_start_rtlsdr();
     if(r >= 0)
         radiom_engine_instance.is_started = true;
     pthread_spin_unlock(&radiom_engine_lock);
@@ -107,7 +106,7 @@ int radiom_engine_getbytes(void *dest, size_t count)
         }
         if(fbsize == 0)
         {
-            r = radiom_engine_refresh_buffer(eng);
+            r = radiom_engine_refresh_buffer();
             if(r == RADIOM_ERROR)
             {
                 fputs("Radiom: RTLSDR device read failed!", stderr);
@@ -137,10 +136,10 @@ int radiom_engine_entropy_bytes(void *dest, size_t count)
         }
         if(fbsize == 0)
         {
-            r = radiom_engine_refresh_buffer(eng);
+            r = radiom_engine_refresh_buffer();
             if(r == RADIOM_ERROR)
             {
-                fputs("Radiom: RTLSDR device read failed!", stderr);
+                fputs("Radiom: RTLSDR device read failed!\n", stderr);
                 exit(-1);
             }
             fbsize = radiom_fifobuf_size(radiom_engine_instance.fb);
