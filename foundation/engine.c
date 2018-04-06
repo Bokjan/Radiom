@@ -20,15 +20,9 @@ void radiom_init(void)
 
 void radiom_exit(void)
 {
-    if(e->is_started)
+    if(radiom_engine_instance.is_started)
         radiom_engine_stop();
     pthread_spin_destroy(&radiom_engine_lock);
-}
-
-radiom_engine_t* radiom_get_engine(void)
-{
-    static radiom_engine_t singleton;
-    return &singleton;
 }
 
 static void radiom_initialize_device(void)
@@ -78,8 +72,6 @@ int radiom_engine_start(void)
 
 int radiom_engine_stop(void)
 {
-    if(eng == NULL)
-        return RADIOM_SUCCESS;
     if(!radiom_engine_instance.is_started)
         rtlsdr_close(radiom_engine_instance.dev);
     if(!radiom_engine_instance.is_initialized)
@@ -158,7 +150,7 @@ int radiom_engine_refresh_buffer(void)
     r = rtlsdr_read_sync(radiom_engine_instance.dev, radiom_engine_instance.fb->raw, RADIOM_FIFOBUF_CAPACITY, &c);
     if(r < 0)
         return RADIOM_ERROR;
-    radiom_whitener_whiten(radiom_engine_instance.wtn, radiom_engine_instance.fb->raw, 
+    radiom_whitener_whiten(radiom_engine_instance.wtn, radiom_engine_instance.fb->raw,
                            radiom_engine_instance.fb->ptr, RADIOM_FIFOBUF_CAPACITY);
     radiom_fifobuf_setfull(radiom_engine_instance.fb);
     return RADIOM_SUCCESS;
