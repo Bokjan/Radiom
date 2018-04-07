@@ -26,7 +26,6 @@ struct radiom_engine
 
 typedef struct radiom_engine radiom_engine_t;
 
-radiom_engine_t* radiom_get_engine(void);
 int radiom_engine_start(void);
 int radiom_engine_stop(void); 
 int radiom_engine_getbytes(void *dest, size_t count);
